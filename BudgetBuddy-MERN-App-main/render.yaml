@@ -1,8 +1,9 @@
 services:
   - type: web
-    name: budgetbuddy-backend
+    name: budgetbuddy
     env: node
-    buildCommand: npm install
+    region: oregon
+    buildCommand: npm install && cd frontend && npm install && npm run build && cd ..
     startCommand: npm start
     envVars:
       - key: MONGO_URI
