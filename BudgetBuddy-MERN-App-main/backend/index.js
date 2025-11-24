@@ -55,11 +55,13 @@ const server = new ApolloServer({
 
 await server.start();
 
-
+// Update CORS for production
 app.use(
   '/graphql',
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.NODE_ENV === 'production' 
+      ? process.env.CLIENT_URL || true 
+      : "http://localhost:3000",
     credentials: true,
   }),
   express.json(),
@@ -68,14 +70,18 @@ app.use(
   }),
 );
 
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, "frontend/dist")));
 
-app.use(express.static(path.join(__dirname, "frontend/dist")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend/dist", "index.html"))
+  })
+}
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend/dist", "index.html"))
-})
+const PORT = process.env.PORT || 4000;
 
-await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
+await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
 await connectDB()
 
-console.log(`🚀 Server ready at http://localhost:4000/graphql`);
+console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
